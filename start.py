@@ -654,5 +654,5 @@ def send(survey_id):
     return redirect('/')
 
 
-if __name__ == __main__:
-    app.run()
+if __name__ == '__main__':
+    app.run(debug=False)
