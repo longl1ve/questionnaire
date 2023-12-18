@@ -652,3 +652,7 @@ def send(survey_id):
 
     session['survey_sent'] = True
     return redirect('/')
+
+
+if __name__ == __main__:
+    app.run()
