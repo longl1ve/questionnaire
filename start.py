@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import random
 from datetime import datetime
 
-app = Flask('questionnaire', static_folder='questionnaire/')
+app = Flask('questionnaire', static_folder='/')
 app.config["SECRET_KEY"] = '12345'
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///questionnaire.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
