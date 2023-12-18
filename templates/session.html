@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!--Link for Bootstrap 5 CSS-->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+		<!--Links for Google Fonts-->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+
+		<!--Link for page icon-->
+		<link rel="icon" type="image/png" href="{{ url_for('static', filename='static/design/img/logo2_thumbnail.png') }}"/>
+
+
+		<title>Перегляд проходження: "{{ session_current.survey.title }}"</title>
+
+
+		<style>
+            .small-screens{
+                font-size:0.8rem !important;
+            }
+
+			body{
+			    font-family: 'Montserrat', sans-serif;
+			    background: linear-gradient(45deg,#F0F0F0,#213555,#4F709C,#E5D283);
+			    background-size: 500% 500%;
+			    animation: animation 10s ease-in-out infinite;
+			}
+			@keyframes animation{
+                0%{
+                    background-position: 0% 50%;
+                }
+                50%{
+                    background-position: 100% 50%;
+                }
+                100%{
+                    background-position: 0% 50%;
+                }
+            }
+
+
+			header{
+				background-color:rgb(36,36,36);
+			}
+			footer{
+				background-color:rgb(36,36,36);
+			}
+
+
+			.text-light-mon{
+				font-family:'Montserrat Light', sans-serif;
+			}
+			.transparency{
+				background-color:rgba(36,36,36,0.75) !important;
+				color:white !important;
+			}
+
+			#logo-header-xl-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+			#logo-footer-xl-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+
+            #logo-header-sm-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+			#logo-footer-sm-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+
+            #iconUserAuthorized{
+				filter: drop-shadow(5px 5px 5px rgba(255,255,255,0.3)) invert(1);
+            }
+            #iconUserNonAuthorized{
+				filter: drop-shadow(5px 5px 5px rgba(255,255,255,0.3)) invert(1);
+            }
+		</style>
+	</head>
+
+	<body>
+
+            <!--If access is opened-->
+
+                <!--XL+ screens-->
+                <div class="d-none d-xl-block">
+
+                    <!--Navbar-->
+                    <header class="p-2 shadow transparency">
+                        <div class="container d-flex flex-wrap align-items-center">
+
+                            <a href="{{ url_for('main') }}">
+                                <img id="logo-header-xl-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                            </a>
+
+                            <ul class="nav col-lg-auto me-lg-auto px-5">
+                                <li><a href="{{ url_for('main') }}" class="nav-link px-2 text-white">Головна</a></li>
+                                <li><a href="{{ url_for('create') }}" class="nav-link px-2 text-white">Створити анкетування</a></li>
+                            </ul>
+
+                            <div>
+                                {% if session['logged_in'] %}
+                                    <!-- Logged in -->
+                                    <form action="{{ url_for('cabinet') }}">
+                                        <button type="submit" class="btn btn-outline-light me-2">Особистий кабінет</button>
+                                        <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#signoutModalCenter-xl-scr">Вихід</button>
+                                    </form>
+                                {% else %}
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </header>
+
+                    <!--Main part of a page-->
+                    <main class="container d-flex flex-wrap align-items-center justify-content-center">
+
+                            <div class="w-100 px-5 pt-5 pb-4 mt-5 mb-2 bg-white shadow-lg rounded">
+                                <p class="h2">{{ session_current.survey.title }}</p>
+                                {% if session_current.user_id == 0 %}
+                                    <p class="text-secondary mb-1">Перегляд анонімного проходження</p>
+                                    <p class="text-secondary">Час проходження: {{ session_current.date_time }}</p>
+                                {% else %}
+                                    <p class="text-secondary mb-1">Перегляд проходження користувача {{ session_current.respondent.name }}</p>
+                                    <p class="text-secondary">Час проходження: {{ session_current.date_time }}</p>
+                                {% endif %}
+                            </div>
+
+                            {% for question in session_current.survey.questions %}
+                                <div class="w-100 my-2 bg-white shadow-lg rounded">
+                                    <div class="p-5">
+
+                                        <p class="h5">{{ question.text }}</p>
+
+                                        <div class="mt-4">
+                                            {% for answer in question.answers %}
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="radio" value="{{ answer.id }}" name="radio-xl{{ question.num_in_survey }}" id="radio-xl{{ question.num_in_survey }}-{{ answer.num_in_question }}"
+                                                    {% for answerforsession in session_current.answersforsessions %}
+                                                        {% if answer.id == answerforsession.answer_id %}
+                                                            checked
+                                                        {% else %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    disabled/>
+                                                    <label class="form-check-label text-light-mon" for="radio-xl{{ question.num_in_survey }}-{{ answer.num_in_question }}">
+                                                        {{ answer.text }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                    </main>
+
+                    <!--Footer-->
+                    <footer class="footer mt-5 shadow-lg transparency">
+                        <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
+                            <p class="mb-0 text" style="font-family:'Montserrat ExtraLight', sans-serif;">&copy; 2023 Pylyp Kutyla</p>
+                            <a href="{{ url_for('main') }}">
+                                <img id="logo-footer-xl-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                            </a>
+                        </div>
+                    </footer>
+
+
+                    <!--Modal for signing out-->
+                    <div class="modal fade" id="signoutModalCenter-xl-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+
+                                <form name="signOutForm-xl" action="{{ url_for('log_out') }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Ви дійсно хочете вийти з акаунту?</h5>
+                                        <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-danger">Так</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+
+
+                <!--XL- screens-->
+                <div class="d-xl-none d-flex flex-column min-vh-100 small-screens">
+
+                    <!--Navbar-->
+                    <header class="p-2 shadow transparency">
+                        <div class="container d-flex flex-row justify-content-between align-items-center">
+                            <a href="{{ url_for('main') }}">
+                                <img id="logo-header-sm-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                            </a>
+
+                            <div class="d-flex justify-content-center align-items-center">
+
+                                {% if session['logged_in'] %}
+                                <!-- Logged in -->
+                                    <!--User Dropdown Menu-->
+                                    <div class="dropdown pe-2">
+                                        <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <img id="iconUserAuthorized" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/user_authorized.svg') }}" alt="user authorized"/>
+                                        </button>
+
+                                        <ul class="dropdown-menu small-screens">
+                                            <li><a href="{{ url_for('cabinet') }}" class="dropdown-item">Особистий кабінет</a></li>
+                                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#signoutModalCenter-sm-scr">Вийти</a></li>
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                {% endif %}
+
+                                <!--Dropdown Navbar Button-->
+                                <nav class="navbar navbar-dark">
+                                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#dropdownNavbar">
+                                        <span class="navbar-toggler-icon"></span>
+                                    </button>
+                                </nav>
+
+                            </div>
+                        </div>
+
+                        <!--Dropdown Navbar Body-->
+                        <div class="collapse" id="dropdownNavbar">
+                            <div class="py-1">
+                                <a href="{{ url_for('main') }}" class="nav-link text-white">Головна</a>
+                                <a href="{{ url_for('create') }}" class="nav-link text-white">Створити анкетування</a>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!--Main part of a page-->
+                    <main class="container d-flex flex-wrap align-items-center justify-content-center mb-3 small-screens">
+
+                            {% if session_current.user_id == 0 %}
+                                <div class="w-100 mt-3 mb-2 pt-4 px-4 pb-2 bg-white shadow-lg rounded">
+                                    <p class="h2">{{ session_current.survey.title }}</p>
+                                    <p class="text-secondary mb-1">Перегляд анонімного проходження</p>
+                                    <p class="text-secondary">Час проходження: {{ session_current.date_time }}</p>
+                                </div>
+                            {% else %}
+                                <div class="w-100 mt-3 mb-2 pt-4 px-4 pb-2 bg-white shadow-lg rounded">
+                                    <p class="h2">{{ session_current.survey.title }}</p>
+                                    <p class="text-secondary mb-1">Перегляд проходження користувача {{ session_current.respondent.name }}</p>
+                                    <p class="text-secondary">Час проходження: {{ session_current.date_time }}</p>
+                                </div>
+                            {% endif %}
+
+                            {% for question in session_current.survey.questions %}
+                                <div class="w-100 my-2 bg-white shadow-lg rounded">
+                                    <div class="p-4">
+
+                                        <p class="h6">{{ question.text }}</p>
+
+                                        <div class="mt-4">
+                                            {% for answer in question.answers %}
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="radio" value="{{ answer.id }}" name="radio-sm{{ question.num_in_survey }}" id="radio-sm{{ question.num_in_survey }}-{{ answer.num_in_question }}"
+                                                    {% for answerforsession in session_current.answersforsessions %}
+                                                        {% if answer.id == answerforsession.answer_id %}
+                                                            checked
+                                                        {% else %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    disabled/>
+                                                    <label class="form-check-label text-light-mon" for="radio-sm{{ question.num_in_survey }}-{{ answer.num_in_question }}">
+                                                        {{ answer.text }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                    </main>
+
+                    <!--Footer-->
+                    <footer class="footer mt-auto shadow-lg transparency">
+                        <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
+                            <p class="mb-0 text" style="font-family:'Montserrat ExtraLight', sans-serif;">&copy; 2023 Pylyp Kutyla</p>
+                            <a href="{{ url_for('main') }}">
+                                <img id="logo-footer-sm-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                            </a>
+                        </div>
+                    </footer>
+
+
+                    <!--Modal for signing out-->
+                    <div class="modal fade" id="signoutModalCenter-sm-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+
+                                <form name="signOutForm-xl" action="{{ url_for('log_out') }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Ви дійсно хочете вийти з акаунту?</h5>
+                                        <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-danger">Так</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+		<!--Script for Bootstrap 5-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+        <!--Script for jQuery-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+
+
+        <!-- jQuery script for surveys constructor for XL+ -->
+        <script>
+            $(document).ready(function() {
+
+                var Num=999;
+
+                $(document).on('click', '.add-variant-btn-xl', function(e) {
+                    e.preventDefault();
+                    var BtnVariantValue=$(this).attr("id");
+
+                    let question_item = $(this).parent().parent();
+                    $(question_item).prepend(`<div class="d-flex align-items-center justify-content-start mt-2">
+                                                    <input name="answer-text-`+BtnVariantValue+`" type="text" class="form-control" required>
+                                                    <button class="btn btn-danger ms-3 remove-variant-btn-xl">Видалити</button>
+                                                </div>`);
+                });
+
+                $(document).on('click', '.remove-variant-btn-xl', function(e){
+                    e.preventDefault();
+                    let variant_item = $(this).parent();
+                    $(variant_item).remove();
+                });
+
+                $("#add-question-btn-xl").click(function(e) {
+                    e.preventDefault();
+                    Num++;
+
+                    $("#questions-div-xl").append(`<div class="w-100 my-2 bg-white shadow-lg rounded">
+                                                    <div class="p-5 position-relative">
+                                                        <button type="button" class="btn-close question-close-btn-xl mt-3 me-3 position-absolute top-0 end-0"></button>
+                                                        <p class="text-secondary mb-0 py-3 px-2">Питання:</p>
+                                                        <input name="question-text-`+Num+`" type="text" class="form-control" required>
+                                                        <p class="text-secondary mt-3 mb-0 py-3 px-2">Варіанти відповідей:</p>
+                                                        <div class="d-flex align-items-center justify-content-start mt-2">
+                                                            <input name="answer-text-b`+Num+`" type="text" class="form-control" required>
+                                                        </div>
+                                                        <div class="d-flex align-items-center justify-content-start mt-2">
+                                                            <input name="answer-text-b`+Num+`" type="text" class="form-control" required>
+                                                        </div>
+
+                                                        <div>
+                                                            <div class="d-flex justify-content-end align-items-center mt-5">
+                                                                <button class="btn btn-primary add-variant-btn-xl" id="b`+Num+`">Додати ще варіант</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>`);
+                });
+
+                $(document).on('click', '.question-close-btn-xl', function(e){
+                    e.preventDefault();
+                    let question_item = $(this).parent().parent();
+                    $(question_item).remove();
+                });
+            });
+        </script>
+
+        <!-- jQuery script for surveys constructor for XL- -->
+        <script>
+            $(document).ready(function() {
+
+                var Num=999;
+
+                $(document).on('click', '.add-variant-btn-sm', function(e) {
+                    e.preventDefault();
+                    var BtnVariantValue=$(this).attr("id");
+
+                    let question_item = $(this).parent().parent();
+                    $(question_item).prepend(`<div class="d-flex align-items-center justify-content-start mt-2">
+                                                    <input name="answer-text-`+BtnVariantValue+`" type="text" class="form-control small-screens" required>
+                                                    <button class="btn btn-danger ms-3 remove-variant-btn-sm small-screens">Видалити</button>
+                                                </div>`);
+                });
+
+                $(document).on('click', '.remove-variant-btn-sm', function(e){
+                    e.preventDefault();
+                    let variant_item = $(this).parent();
+                    $(variant_item).remove();
+                });
+
+                $("#add-question-btn-sm").click(function(e) {
+                    e.preventDefault();
+                    Num++;
+
+                    $("#questions-div-sm").append(`<div class="w-100 my-2 bg-white shadow-lg rounded">
+                                                        <div class="p-4 position-relative">
+                                                            <button type="button" class="btn-close question-close-btn-sm mt-3 me-3 position-absolute top-0 end-0"></button>
+                                                            <p class="text-secondary mb-0 py-3 px-2">Питання:</p>
+                                                            <input name="question-text-`+Num+`" type="text" class="form-control small-screens" required>
+                                                            <p class="text-secondary mt-3 mb-0 py-3 px-2">Варіанти відповідей:</p>
+                                                            <div class="d-flex align-items-center justify-content-start mt-2">
+                                                                <input name="answer-text-s`+Num+`" type="text" class="form-control small-screens" required>
+                                                            </div>
+                                                            <div class="d-flex align-items-center justify-content-start mt-2">
+                                                                <input name="answer-text-s`+Num+`" type="text" class="form-control small-screens" required>
+                                                            </div>
+
+                                                            <div>
+                                                                <div class="d-flex justify-content-end align-items-center mt-5">
+                                                                    <button class="btn btn-primary add-variant-btn-sm small-screens" id="s`+Num+`">Додати ще варіант</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>`);
+                });
+
+                $(document).on('click', '.question-close-btn-sm', function(e){
+                    e.preventDefault();
+                    let question_item = $(this).parent().parent();
+                    $(question_item).remove();
+                });
+            });
+        </script>
+
+
+
+        <!--Script for HTMX-->
+        <script src="https://unpkg.com/htmx.org@1.9.9"></script>
+
+        <!--Scripts for Forms validation-->
+        <script src="{{ url_for('static', filename='static/js/bootstrap-form-signUpValidation.js') }}"></script>
+        <script src="{{ url_for('static', filename='static/js/bootstrap-form-signInValidation.js') }}"></script>
+
+
+    </body>
+</html>

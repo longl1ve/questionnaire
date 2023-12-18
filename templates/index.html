@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!--Link for Bootstrap 5 CSS-->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+		<!--Links for Google Fonts-->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+
+		<!--Link for page icon-->
+		<link rel="icon" type="image/png" href="{{ url_for('static', filename='static/design/img/logo2_thumbnail.png') }}"/>
+
+
+		<title>questionnaire</title>
+
+
+		<style>
+            /* Chrome, Safari, Edge, Opera */
+            input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button {
+              -webkit-appearance: none;
+              margin: 0;
+            }
+
+            /* Firefox */
+            input[type=number] {
+              -moz-appearance: textfield;
+            }
+
+
+            .small-screens{
+                font-size:0.8rem !important;
+            }
+
+			body{
+			    font-family: 'Montserrat', sans-serif;
+			    background: linear-gradient(45deg,#F0F0F0,#213555,#4F709C,#E5D283);
+			    background-size: 500% 500%;
+			    animation: animation 10s ease-in-out infinite;
+			}
+			@keyframes animation{
+                0%{
+                    background-position: 0% 50%;
+                }
+                50%{
+                    background-position: 100% 50%;
+                }
+                100%{
+                    background-position: 0% 50%;
+                }
+            }
+
+
+			header{
+				background-color:rgb(36,36,36);
+			}
+			footer{
+				background-color:rgb(36,36,36);
+			}
+
+
+			.text-light-mon{
+				font-family:'Montserrat Light', sans-serif;
+			}
+			.transparency{
+				background-color:rgba(36,36,36,0.75) !important;
+				color:white !important;
+			}
+
+			#logo-header-xl-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+			#logo-footer-xl-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+
+            #logo-header-sm-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+			#logo-footer-sm-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+
+            #iconUserAuthorized{
+				filter: drop-shadow(5px 5px 5px rgba(255,255,255,0.3)) invert(1);
+            }
+            #iconUserNonAuthorized{
+				filter: drop-shadow(5px 5px 5px rgba(255,255,255,0.3)) invert(1);
+            }
+		</style>
+	</head>
+
+	<body>
+
+        <!--XL+ screens-->
+        <div class="d-none d-xl-block">
+
+            <!--Navbar-->
+            <header class="p-2 shadow transparency">
+                <div class="container d-flex flex-wrap align-items-center">
+                    <a href="{{ url_for('main') }}">
+                        <img id="logo-header-xl-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                    </a>
+
+                    <ul class="nav col-lg-auto me-lg-auto px-5">
+                        <li><a href="{{ url_for('main') }}" class="nav-link px-2 text-secondary">Головна</a></li>
+                        <li><a href="{{ url_for('create') }}" class="nav-link px-2 text-white">Створити анкетування</a></li>
+                    </ul>
+
+                    <div>
+                        {% if session['logged_in'] %}
+                            <!-- Logged in -->
+                            <form action="{{ url_for('cabinet') }}">
+                                <button type="submit" class="btn btn-outline-light me-2">Особистий кабінет</button>
+                                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#signoutModalCenter-xl-scr">Вихід</button>
+                            </form>
+                        {% else %}
+                        <!-- Not Logged in -->
+                            <button type="button" class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#signinModalCenter-xl-scr">Увійти</button>
+                            <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#signupModalCenter-xl-scr">Зареєструватися</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </header>
+
+            <!--Main part of a page-->
+            <main class="container d-flex flex-wrap align-items-center justify-content-center">
+
+                <!--Registration successful alert-->
+                {% if session['registration_alert'] == True %}
+                    <div class="w-100 mt-3 p-3 rounded shadow-sm transparency" style="background-color:green !important;">
+                        <p class="text-successful">Вас було зареєстровано! Будь ласка, увійдіть в акаунт.</p>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!--Invalid e-mail(password) alert-->
+                {% if session['email_alert'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-danger alert-dismissible fade show text-center w-50 mt-3" role="alert">
+                            <p class="mb-0">Жодний акаунт не пов'язаний з цією електронною адресою</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% elif session['password_alert'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-danger alert-dismissible fade show text-center w-50 mt-3" role="alert">
+                            <p class="mb-0">Неправильний пароль</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!-- E-mail already exists alert -->
+                {% if session['email_exists_alert'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-danger alert-dismissible fade show text-center w-50 mt-3" role="alert">
+                            <p class="mb-0">Акаунт з такою електронною адресою вже існує</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!-- Survey created alert -->
+                {% if session['survey_created'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-success alert-dismissible fade show text-center w-50 mt-3" role="alert">
+                            <p class="mb-0">Анкетування успішно створено! Подробиці можна подивитися в особистому кабінеті.</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!--Survey not found alert-->
+                {% if session['survey_not_found'] == True %}
+                    <div class="w-100 mt-3 p-3 rounded shadow-sm transparency" style="background-color:red !important;">
+                        <p class="text-white">Анкетування за вказаним кодом не знайдено.</p>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!--Survey not found alert-->
+                {% if session['survey_closed'] == True %}
+                    <div class="w-100 mt-3 p-3 rounded shadow-sm transparency" style="background-color:red !important;">
+                        <p class="text-white">Доступ до анкетування закритий.</p>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!-- Survey sent alert -->
+                {% if session['survey_sent'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-success alert-dismissible fade show text-center w-50 mt-3" role="alert">
+                            <p class="mb-0">Відповіді успішно відправлені!</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% else %}
+                {% endif %}
+
+
+                <!--Search bar-->
+                <div class="w-75 mt-3 p-3 rounded shadow-sm transparency">
+
+                    <form action="{{ url_for('survey_redirect') }}" method="POST">
+                        <div class="input-group w-100">
+                                <button class="btn btn-outline-light" type="submit">Знайти</button>
+                                <input name="survey_code" type="number" class="form-control" placeholder="Код анкетування" required>
+                        </div>
+                    </form>
+
+                </div>
+
+                <!--Introduction div-->
+                <div class="w-100 my-3 p-5 shadow-lg rounded transparency">
+                    <p class="h1 text-center">Створення анкетувань і збір відповідей<br>у три простих кроки</p>
+                    <div class="d-flex flex-wrap mt-5">
+                        <img class="img-fluid rounded-3" style="width:40vw;" src="{{ url_for('static', filename='static/design/img/p1_1.jpg') }}" alt="photo1"/>
+                        <div class="col px-5">
+                            <p class="display-1" style="color:rgba(79,112,156);">01</p>
+                            <p class="h2">Створіть анкетування</p>
+                            <p class="text-light-mon">Створюйте професійні анкетування за допомогою простого у використанні редактора анкет.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap mt-5">
+                        <div class="col px-5">
+                            <p class="display-1" style="color:rgb(79,112,156);">02</p>
+                            <p class="h2">Збирайте інформацію</p>
+                            <p class="text-light-mon">Охопіть респондентів у всіх типах пристроїв. Відстежуйте успіх своїх опитувань в режимі реального часу.</p>
+                        </div>
+                        <img class="img-fluid rounded-3" style="width:40vw;" src="{{ url_for('static', filename='static/design/img/p2_1.jpg') }}" alt="photo2"/>
+                    </div>
+                    <div class="d-flex flex-wrap mt-5">
+                        <img class="img-fluid rounded-3" style="width:40vw;" src="{{ url_for('static', filename='static/design/img/p3_1.jpg') }}" alt="photo3"/>
+                        <div class="col px-5">
+                            <p class="display-1" style="color:rgb(79,112,156);">03</p>
+                            <p class="h2">Аналізуйте результати</p>
+                            <p class="text-light-mon">Автоматично обробляйте дані опитувань у звітах і дашбордах. Виберіть бажаний формат і представте результати,
+                                які будуть зрозумілі вашій аудиторії.</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!--Footer-->
+            <footer class="footer mt-5 shadow-lg transparency">
+                <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
+                    <p class="mb-0 text" style="font-family:'Montserrat ExtraLight', sans-serif;">&copy; 2023 Pylyp Kutyla</p>
+                    <a href="{{ url_for('main') }}">
+                        <img id="logo-footer-xl-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                    </a>
+                </div>
+            </footer>
+
+
+            <!--Modal for signing out-->
+            <div class="modal fade" id="signoutModalCenter-xl-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+
+                        <form name="signOutForm-xl" action="{{ url_for('log_out') }}">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Ви дійсно хочете вийти з акаунту?</h5>
+                                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-danger">Так</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <!--Modal for signing in-->
+            <div class="modal fade" id="signinModalCenter-xl-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+
+                        <form name="signInForm-xl" action="{{ url_for('log_in') }}" method="POST" class="needs-validation-signIn" novalidate>
+                            <div class="modal-header">
+                                <h5 class="modal-title">Вхід</h5>
+                                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body p-4">
+                                <div>
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Електронна пошта:</p>
+                                    <input name="emailSignIn" type="email" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть коректну електронну пошту
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Пароль:</p>
+                                    <input name="passwordSignIn" type="password" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть пароль
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Увійти</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <!--Modal for signing up-->
+            <div class="modal fade" id="signupModalCenter-xl-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+
+                        <form name="signUpForm-xl" action="{{ url_for('registration') }}" method="POST" class="needs-validation-signUp" novalidate>
+                            <div class="modal-header">
+                                <h5 class="modal-title">Реєстрація</h5>
+                                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body p-4">
+                                <div>
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Ім'я:</p>
+                                    <input name="nameSignUp" type="text" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть своє ім'я
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Електронна пошта:</p>
+                                    <input name="emailSignUp" type="email" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть правильну електронну пошту
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Пароль:</p>
+                                    <input name="passwordSignUp" type="password" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть пароль
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Введіть пароль ще раз:</p>
+                                    <input name="password2SignUp" type="password" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Паролі не співпадають
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Зареєструватися</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+        <!--XL- screens-->
+        <div class="d-xl-none d-flex flex-column min-vh-100 small-screens">
+
+            <!--Navbar-->
+            <header class="p-2 shadow transparency">
+                <div class="container d-flex flex-row justify-content-between align-items-center">
+                    <a href="{{ url_for('main') }}">
+                        <img id="logo-header-sm-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                    </a>
+
+                    <div class="d-flex justify-content-center align-items-center">
+
+                        {% if session['logged_in'] %}
+                        <!-- Logged in -->
+                            <!--User Dropdown Menu-->
+                            <div class="dropdown pe-2">
+                                <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img id="iconUserAuthorized" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/user_authorized.svg') }}" alt="user authorized"/>
+                                </button>
+
+                                <ul class="dropdown-menu small-screens">
+                                    <li><a href="{{ url_for('cabinet') }}" class="dropdown-item">Особистий кабінет</a></li>
+                                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#signoutModalCenter-sm-scr">Вийти</a></li>
+                                </ul>
+                            </div>
+                        {% else %}
+                        <!-- Not Logged in -->
+                            <!--User Dropdown Menu-->
+                            <div class="dropdown pe-2">
+                                <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img id="iconUserNonAuthorized" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/user_nonauthorized.svg') }}" alt="user nonauthorized"/>
+                                </button>
+
+                                <ul class="dropdown-menu small-screens">
+                                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#signinModalCenter-sm-scr">Увійти</a></li>
+                                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#signupModalCenter-sm-scr">Зареєструватися</a></li>
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <!--Dropdown Navbar Button-->
+                        <nav class="navbar navbar-dark">
+                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#dropdownNavbar">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
+                        </nav>
+
+                    </div>
+                </div>
+
+                <!--Dropdown Navbar Body-->
+                <div class="collapse" id="dropdownNavbar">
+                    <div class="py-1">
+                        <a href="{{ url_for('main') }}" class="nav-link text-secondary">Головна</a>
+                        <a href="{{ url_for('create') }}" class="nav-link text-white">Створити анкетування</a>
+                    </div>
+                </div>
+            </header>
+
+            <!--Main part of a page-->
+            <main class="container d-flex flex-wrap align-items-center justify-content-center">
+
+                <!--Registration successful alert-->
+                {% if session['registration_alert'] == True %}
+                    <div class="w-100 mt-3 p-3 rounded shadow-sm transparency" style="background-color:green !important;">
+                        <p class="text-successful">Вас було зареєстровано! Будь ласка, увійдіть в акаунт.</p>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!--Invalid e-mail(password) alert-->
+                {% if session['email_alert'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-danger alert-dismissible fade show w-75 mt-3" role="alert">
+                            <p class="mb-0">Жодний акаунт не пов'язаний з цією електронною адресою</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% elif session['password_alert'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-danger alert-dismissible fade show w-75 mt-3" role="alert">
+                            <p class="mb-0">Неправильний пароль</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!-- E-mail already exists alert -->
+                {% if session['email_exists_alert'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-danger alert-dismissible fade show text-center w-75 mt-3" role="alert">
+                            <p class="mb-0">Акаунт з такою електронною адресою вже існує</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!-- Survey created alert -->
+                {% if session['survey_created'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-success alert-dismissible fade show text-center w-75 mt-3" role="alert">
+                            <p class="mb-0">Анкетування успішно створено! Подробиці можна подивитися в особистому кабінеті.</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!--Survey not found alert-->
+                {% if session['survey_not_found'] == True %}
+                    <div class="w-100 mt-3 p-3 rounded shadow-sm transparency" style="background-color:red !important;">
+                        <p class="text-white">Анкетування за вказаним кодом не знайдено.</p>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!-- Survey Sent alert -->
+                {% if session['survey_sent'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-success alert-dismissible fade show text-center w-75 mt-3" role="alert">
+                            <p class="mb-0">Відповіді успішно відправлені!</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% else %}
+                {% endif %}
+
+                <!--Survey closed alert-->
+                {% if session['survey_closed'] == True %}
+                    <div class="w-100 mt-3 p-3 rounded shadow-sm transparency" style="background-color:red !important;">
+                        <p class="text-successful">Доступ до анкетування закритий.</p>
+                    </div>
+                {% else %}
+                {% endif %}
+
+
+                <!--Search bar-->
+                <div class="w-75 mt-3 p-3 rounded shadow-sm transparency">
+                    <form action="{{ url_for('survey_redirect') }}" method="POST">
+                        <div class="input-group w-100">
+                            <button class="btn btn-outline-light small-screens" type="submit">Знайти</button>
+                            <input name="survey_code" type="number" class="form-control small-screens" placeholder="Код анкетування" required>
+                        </div>
+                    </form>
+                </div>
+
+                <!--Introduction div-->
+                <div class="w-100 mt-3 mb-5 px-2 py-4 shadow-lg rounded transparency">
+                    <p class="h6 text-center">Створення анкетувань і збір відповідей у три простих кроки</p>
+                    <div class="col px-4 mt-4">
+                        <p class="display-1" style="color:rgba(79,112,156);">01</p>
+                        <p class="h2">Створіть анкетування</p>
+                        <p class="text-light-mon">Створюйте професійні анкетування за допомогою простого у використанні редактора анкет.</p>
+                    </div>
+                    <div class="col px-4">
+                        <p class="display-1" style="color:rgb(79,112,156);">02</p>
+                        <p class="h2">Збирайте інформацію</p>
+                        <p class="text-light-mon">Охопіть респондентів у всіх типах пристроїв. Відстежуйте успіх своїх опитувань в режимі реального часу.</p>
+                    </div>
+                    <div class="col px-4">
+                        <p class="display-1" style="color:rgb(79,112,156);">03</p>
+                        <p class="h2">Аналізуйте результати</p>
+                        <p class="text-light-mon">Автоматично обробляйте дані опитувань у звітах і дашбордах. Виберіть бажаний формат і представте результати,
+                            які будуть зрозумілі вашій аудиторії.</p>
+                    </div>
+                </div>
+            </main>
+
+            <!--Footer-->
+            <footer class="footer mt-auto shadow-lg transparency">
+                <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
+                    <p class="mb-0 text" style="font-family:'Montserrat ExtraLight', sans-serif;">&copy; 2023 Pylyp Kutyla</p>
+                    <a href="{{ url_for('main') }}">
+                        <img id="logo-footer-sm-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                    </a>
+                </div>
+            </footer>
+
+
+            <!--Modal for signing out-->
+            <div class="modal fade" id="signoutModalCenter-sm-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+
+                        <form name="signOutForm-xl" action="{{ url_for('log_out') }}">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Ви дійсно хочете вийти з акаунту?</h5>
+                                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-danger">Так</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <!--Modal for signing in-->
+            <div class="modal fade" id="signinModalCenter-sm-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+
+                        <form name="signInForm-sm" action="{{ url_for('log_in') }}" method="POST" class="needs-validation-signIn" novalidate>
+                            <div class="modal-header">
+                                <h5 class="modal-title">Вхід</h5>
+                                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body p-4">
+                                <div>
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Електронна пошта:</p>
+                                    <input name="emailSignIn" type="email" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть правильну електронну пошту
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Пароль:</p>
+                                    <input name="passwordSignIn" type="password" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть пароль
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Увійти</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <!--Modal for signing up-->
+            <div class="modal fade" id="signupModalCenter-sm-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+
+                        <form name="signUpForm-sm" action="{{ url_for('registration') }}" method="POST" class="needs-validation-signUp" novalidate>
+                            <div class="modal-header">
+                                <h5 class="modal-title">Реєстрація</h5>
+                                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body p-4">
+                                <div>
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Ім'я:</p>
+                                    <input name="nameSignUp" type="text" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть своє ім'я
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Електронна пошта:</p>
+                                    <input name="emailSignUp" type="email" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть правильну електронну пошту
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Пароль:</p>
+                                    <input name="passwordSignUp" type="password" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть пароль
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Введіть пароль ще раз:</p>
+                                    <input name="password2SignUp" type="password" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Паролі не співпадають
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Зареєструватися</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+		<!--Script for Bootstrap 5-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+        <!--Script for jQuery-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+        <!--Script for HTMX-->
+        <script src="https://unpkg.com/htmx.org@1.9.9"></script>
+
+        <!--Scripts for Forms validation-->
+        <script src="{{ url_for('static', filename='static/js/bootstrap-form-signUpValidation.js') }}"></script>
+        <script src="{{ url_for('static', filename='static/js/bootstrap-form-signInValidation.js') }}"></script>
+
+
+    </body>
+</html>

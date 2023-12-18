@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!--Link for Bootstrap 5 CSS-->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+		<!--Links for Google Fonts-->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+
+		<!--Link for page icon-->
+		<link rel="icon" type="image/png" href="{{ url_for('static', filename='static/design/img/logo2_thumbnail.png') }}"/>
+
+
+		<title>Особистий кабінет</title>
+
+
+		<style>
+            .small-screens{
+                font-size:0.8rem !important;
+            }
+
+			body{
+			    font-family: 'Montserrat', sans-serif;
+			    background: linear-gradient(45deg,#F0F0F0,#213555,#4F709C,#E5D283);
+			    background-size: 500% 500%;
+			    animation: animation 10s ease-in-out infinite;
+			}
+			@keyframes animation{
+                0%{
+                    background-position: 0% 50%;
+                }
+                50%{
+                    background-position: 100% 50%;
+                }
+                100%{
+                    background-position: 0% 50%;
+                }
+            }
+
+
+			header{
+				background-color:rgb(36,36,36);
+			}
+			footer{
+				background-color:rgb(36,36,36);
+			}
+
+
+			.text-light-mon{
+				font-family:'Montserrat Light', sans-serif;
+			}
+			.transparency{
+				background-color:rgba(36,36,36,0.75) !important;
+				color:white !important;
+			}
+
+			#logo-header-xl-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+			#logo-footer-xl-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+
+            #logo-header-sm-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+			#logo-footer-sm-scr{
+				filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+			}
+
+            #iconUserAuthorized{
+				filter: drop-shadow(5px 5px 5px rgba(255,255,255,0.3)) invert(1);
+            }
+            #iconUserNonAuthorized{
+				filter: drop-shadow(5px 5px 5px rgba(255,255,255,0.3)) invert(1);
+            }
+		</style>
+	</head>
+
+	<body>
+
+        {% if session['logged_in'] == True %}
+
+        <!--If user is authorized-->
+
+            <!--XL+ screens-->
+            <div class="d-none d-xl-block">
+
+                <!--Navbar-->
+                <header class="p-2 shadow transparency">
+                    <div class="container d-flex flex-wrap align-items-center">
+
+                        <a href="{{ url_for('main') }}">
+                            <img id="logo-header-xl-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                        </a>
+
+                        <ul class="nav col-lg-auto me-lg-auto px-5">
+                            <li><a href="{{ url_for('main') }}" class="nav-link px-2 text-white">Головна</a></li>
+                            <li><a href="{{ url_for('create') }}" class="nav-link px-2 text-white">Створити анкетування</a></li>
+                        </ul>
+
+                        <div>
+                            {% if session['logged_in'] %}
+                                <!-- Logged in -->
+                                <form action="{{ url_for('cabinet') }}">
+                                    <button type="submit" class="btn btn-outline-light me-2">Особистий кабінет</button>
+                                    <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#signoutModalCenter-xl-scr">Вихід</button>
+                                </form>
+                            {% else %}
+                            <!-- Not Logged in -->
+                                <button type="button" class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#signinModalCenter-xl-scr">Увійти</button>
+                                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#signupModalCenter-xl-scr">Зареєструватися</button>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </header>
+
+                <!--Main part of a page-->
+                <main class="container d-flex flex-wrap align-items-center justify-content-center">
+
+                    <!--Survey changed successful alert-->
+                    {% if session['survey_changed'] == True %}
+                        <div class="w-100 mt-3 p-3 rounded shadow-sm transparency" style="background-color:green !important;">
+                            <p class="text-successful">Анкетування було успішно змінено!</p>
+                        </div>
+                    {% else %}
+                    {% endif %}
+
+                    <div class="container-fluid d-flex justify-content-center mt-5">
+
+                        <div class="container-fluid align-self-start w-25 d-flex flex-wrap align-items-center justify-content-center">
+
+                            {% if session['profile'] %}
+
+                                <!-- Profile selected -->
+                                <a href="{{ url_for('profile') }}" class="w-100 text-decoration-none">
+                                    <div class="w-100 p-3 rounded shadow-sm bg-white ">
+                                        <p class="mb-1 text-secondary">{{ user.name }}</p>
+                                        <p class="text-secondary mt-0 mb-0" style="font-size:0.7rem;">{{ user.email }}</p>
+                                    </div>
+                                </a>
+
+                                <div class="w-100 mt-2 p-3 rounded shadow-sm bg-white">
+                                    <p class="p-2 mb-0"><a href="{{ url_for('mysurveys') }}" class="text-dark text-decoration-none">Мої анкетування</a></p>
+                                    <p class="border-top p-2 mb-0"><a href="{{ url_for('analytics_cabinet') }}" class="text-dark text-decoration-none">Аналітика</a></p>
+                                    <!-- <p class="p-2 mb-0"><a href="{{ url_for('creategraphic') }}" class="text-dark text-decoration-none">Створити графік</a></p> -->
+                                </div>
+
+                            {% elif session['mysurveys'] %}
+
+                                <!-- Surveys selected -->
+                                <a href="{{ url_for('profile') }}" class="w-100 text-decoration-none">
+                                    <div class="w-100 p-3 rounded shadow-sm bg-white ">
+                                        <p class="mb-1">{{ user.name }}</p>
+                                        <p class="text-secondary mt-0 mb-0" style="font-size:0.7rem;">{{ user.email }}</p>
+                                    </div>
+                                </a>
+
+                                <div class="w-100 mt-2 p-3 rounded shadow-sm bg-white">
+                                    <p class="p-2 mb-0"><a href="{{ url_for('mysurveys') }}" class="text-secondary text-decoration-none">Мої анкетування</a></p>
+                                    <p class="border-top p-2 mb-0"><a href="{{ url_for('analytics_cabinet') }}" class="text-dark text-decoration-none">Аналітика</a></p>
+                                    <!-- <p class="p-2 mb-0"><a href="{{ url_for('creategraphic') }}" class="text-dark text-decoration-none">Створити графік</a></p> -->
+                                </div>
+
+                            {% elif session['analytics'] %}
+
+                                <!-- Analytics selected -->
+                                <a href="{{ url_for('profile') }}" class="w-100 text-decoration-none">
+                                    <div class="w-100 p-3 rounded shadow-sm bg-white ">
+                                        <p class="mb-1">{{ user.name }}</p>
+                                        <p class="text-secondary mt-0 mb-0" style="font-size:0.7rem;">{{ user.email }}</p>
+                                    </div>
+                                </a>
+
+                                <div class="w-100 mt-2 p-3 rounded shadow-sm bg-white">
+                                    <p class="p-2 mb-0"><a href="{{ url_for('mysurveys') }}" class="text-dark text-decoration-none">Мої анкетування</a></p>
+                                    <p class="border-top p-2 mb-0"><a href="{{ url_for('analytics_cabinet') }}" class="text-secondary text-decoration-none">Аналітика</a></p>
+                                    <!-- <p class="p-2 mb-0"><a href="{{ url_for('creategraphic') }}" class="text-dark text-decoration-none">Створити графік</a></p> -->
+                                </div>
+
+                            {% elif session['creategraphic'] %}
+
+                                <!-- Create graphic selected -->
+                                <a href="{{ url_for('profile') }}" class="w-100 text-decoration-none">
+                                    <div class="w-100 p-3 rounded shadow-sm bg-white ">
+                                        <p class="mb-1">{{ user.name }}</p>
+                                        <p class="text-secondary mt-0 mb-0" style="font-size:0.7rem;">{{ user.email }}</p>
+                                    </div>
+                                </a>
+
+                                <div class="w-100 mt-2 p-3 rounded shadow-sm bg-white">
+                                    <p class="p-2 mb-0"><a href="{{ url_for('mysurveys') }}" class="text-dark text-decoration-none">Мої анкетування</a></p>
+                                    <p class="border-top p-2 mb-0"><a href="{{ url_for('analytics_cabinet') }}" class="text-dark text-decoration-none">Аналітика</a></p>
+                                    <!-- <p class="p-2 mb-0"><a href="{{ url_for('creategraphic') }}" class="text-secondary text-decoration-none">Створити графік</a></p> -->
+                                </div>
+
+                            {% else %}
+
+                                <!-- Nothing selected -->
+                                <a href="{{ url_for('profile') }}" class="w-100 text-decoration-none">
+                                    <div class="w-100 p-3 rounded shadow-sm bg-white ">
+                                        <p class="mb-1">{{ user.name }}</p>
+                                        <p class="text-secondary mt-0 mb-0" style="font-size:0.7rem;">{{ user.email }}</p>
+                                    </div>
+                                </a>
+
+                                <div class="w-100 mt-2 p-3 rounded shadow-sm bg-white">
+                                    <p class="p-2 mb-0"><a href="{{ url_for('mysurveys') }}" class="text-dark text-decoration-none">Мої анкетування</a></p>
+                                    <p class="border-top p-2 mb-0"><a href="{{ url_for('analytics_cabinet') }}" class="text-dark text-decoration-none">Аналітика</a></p>
+                                    <!-- <p class="p-2 mb-0"><a href="{{ url_for('creategraphic') }}" class="text-dark text-decoration-none">Створити графік</a></p> -->
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Side-block -->
+                        <div class="w-75 ms-3 align-self-start rounded shadow-sm bg-white" style="min-height:75vh !important;">
+
+                            {% if session['profile'] %}
+
+                                <!-- Profile -->
+                                <p class="h1 p-5 border-bottom">Мій профіль</p>
+                                <div class="p-5">
+                                    <p class="text-secondary border-bottom mb-0 py-3 px-2">Ім'я</p>
+                                    <p class="mt-0 py-3 px-2">{{ user.name }}</p>
+                                    <p class="text-secondary border-bottom mt-4 mb-0 py-3 px-2">Електронна адреса</p>
+                                    <p class="mt-0 py-3 px-2">{{ user.email }}</p>
+                                    <p class="text-secondary border-bottom mt-4 mb-0 py-3 px-2">Пароль</p>
+                                    <p class="mt-0 py-3 px-2">**********</p>
+                                </div>
+
+                            {% elif session['mysurveys'] %}
+
+                                <!-- Surveys -->
+                                <div class="px-5 pt-5 pb-3 border-bottom">
+                                    <p class="h3">Мої анкетування</p>
+                                    <p class="text-secondary">Виберіть анкетування, щоб проглянути або змінити його</p>
+                                </div>
+
+                                {% if surveys %}
+                                    {% for survey in surveys %}
+                                        <div class="position-relative">
+                                            <button type="button" class="btn-close mt-3 me-3 position-absolute top-0 end-0" data-bs-toggle="modal" data-bs-target="#deleteSurveyModalCenter{{ survey.id }}-xl-scr"></button>
+                                            <!--Modal for deleting surveys-->
+                                            <div class="modal fade" id="deleteSurveyModalCenter{{ survey.id }}-xl-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                    <div class="modal-content">
+
+                                                        <form name="deleteSurveyForm{{ survey.id }}-xl" action="{{ url_for('delete_survey', survey_id=survey.id) }}" method="POST">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Ви дійсно хочете видалити це анкетування?</h5>
+                                                                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+
+                                                            <div class="modal-footer">
+                                                                <button type="submit" class="btn btn-danger">Так</button>
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
+                                                            </div>
+                                                        </form>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="border-bottom px-5 my-3">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <p class="mb-1 text-secondary" style="font-size:0.85rem;">Назва анкетування:</p>
+                                                    </div>
+                                                    <div class="col">
+                                                        <form action="{{ url_for('change_survey_access', survey_id=survey.id) }}" method="POST">
+                                                            <div class="mb-0 text-secondary form-check form-switch" style="font-size:0.85rem;">
+                                                                <label class="form-check-label" for="switchReverse{{ survey.id }}">
+                                                                    Доступ
+                                                                </label>
+                                                                <input id="switchReverse{{ survey.id }}" name="switch" class="form-check-input" type="checkbox" role="switch" value="1"
+                                                                       {% if survey.access %}
+                                                                            checked
+                                                                       {% else %}
+                                                                            {% endif %}
+                                                                />
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                    <div class="col">
+                                                        <p class="mb-0 text-secondary" style="font-size:0.85rem;">Код для проходження:</p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <a href="{{ url_for('my_survey', survey_code=survey.code) }}" class="w-100 text-decoration-none">
+                                                            <p>{{ survey.title }}</p>
+                                                        </a>
+                                                    </div>
+                                                    <div class="col">
+                                                        {% if survey.access %}
+                                                            <p class="text-success">Відкритий</p>
+                                                        {% else %}
+                                                            <p class="text-danger">Закритий</p>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="col">
+                                                        <p class="text-dark">{{ survey.code }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-light-mon p-5 h3">Наразі ви не маєте жодного створеного анкетування.</div>
+                                {% endif %}
+
+                            {% elif session['analytics'] %}
+
+                                <!-- Analytics -->
+                                <div class="px-5 pt-5 pb-3 border-bottom">
+                                    <p class="h3">Аналітика</p>
+                                    <p class="text-secondary">Виберіть анкетування, щоб побачити аналітику до нього</p>
+                                </div>
+
+                                {% if surveys %}
+                                    {% for survey in surveys %}
+                                        <div>
+                                            <div class="border-bottom px-5 my-3">
+                                                <div class="row">
+                                                    <div class="col-9">
+                                                        <p class="mb-1 text-secondary" style="font-size:0.85rem;">Назва анкетування:</p>
+                                                    </div>
+                                                    <div class="col">
+                                                        <p class="mb-0 text-secondary" style="font-size:0.85rem;">Кількість проходжень:</p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-9">
+                                                        <a href="{{ url_for('analytics', survey_code=survey.code) }}" class="w-100 text-decoration-none">
+                                                            <p>{{ survey.title }}</p>
+                                                        </a>
+                                                    </div>
+                                                    <div class="col">
+                                                        {% if survey.sessions %}
+                                                            <p class="text-dark">
+                                                                {% for session_n in survey.sessions %}
+                                                                    {% if loop.nextitem is not defined %}
+                                                                        {{ loop.length }}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </p>
+                                                        {% else %}
+                                                            <p class="text-danger">Жодного</p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-light-mon p-5 h3">Наразі ви не маєте жодного створеного анкетування.</div>
+                                {% endif %}
+
+                            {% elif session['creategraphic'] %}
+
+                                <!-- Create graphic -->
+                                graphics
+
+                            {% else %}
+                                <div class="p-5">
+                                    <p class="h1">Це ваш особистий кабінет</p>
+                                    <p class="h5 mt-3 text-light-mon text-secondary">Оберіть розділ, який вам потрібен, на навігаційній панелі зліва</p>
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                </main>
+
+                <!--Footer-->
+                <footer class="footer mt-5 shadow-lg transparency">
+                    <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
+                        <p class="mb-0 text" style="font-family:'Montserrat ExtraLight', sans-serif;">&copy; 2023 Pylyp Kutyla</p>
+                        <a href="{{ url_for('main') }}">
+                            <img id="logo-footer-xl-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                        </a>
+                    </div>
+                </footer>
+
+
+                <!--Modal for signing out-->
+                <div class="modal fade" id="signoutModalCenter-xl-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+
+                            <form name="signOutForm-xl" action="{{ url_for('log_out') }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Ви дійсно хочете вийти з акаунту?</h5>
+                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-danger">Так</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+
+            <!--XL- screens-->
+            <div class="d-xl-none d-flex flex-column min-vh-100 small-screens">
+
+                <!--Navbar-->
+                <header class="p-2 shadow transparency">
+                    <div class="container d-flex flex-row justify-content-between align-items-center">
+                        <a href="{{ url_for('main') }}">
+                            <img id="logo-header-sm-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                        </a>
+
+                        <div class="d-flex justify-content-center align-items-center">
+
+                            {% if session['logged_in'] %}
+                            <!-- Logged in -->
+                                <!--User Dropdown Menu-->
+                                <div class="dropdown pe-2">
+                                    <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img id="iconUserAuthorized" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/user_authorized.svg') }}" alt="user authorized"/>
+                                    </button>
+
+                                    <ul class="dropdown-menu small-screens">
+                                        <li><a href="{{ url_for('cabinet') }}" class="dropdown-item">Особистий кабінет</a></li>
+                                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#signoutModalCenter-sm-scr">Вийти</a></li>
+                                    </ul>
+                                </div>
+                            {% else %}
+                            <!-- Not Logged in -->
+                                <!--User Dropdown Menu-->
+                                <div class="dropdown pe-2">
+                                    <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img id="iconUserNonAuthorized" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/user_nonauthorized.svg') }}" alt="user nonauthorized"/>
+                                    </button>
+
+                                    <ul class="dropdown-menu small-screens">
+                                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#signinModalCenter-sm-scr">Увійти</a></li>
+                                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#signupModalCenter-sm-scr">Зареєструватися</a></li>
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+                            <!--Dropdown Navbar Button-->
+                            <nav class="navbar navbar-dark">
+                                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#dropdownNavbar">
+                                    <span class="navbar-toggler-icon"></span>
+                                </button>
+                            </nav>
+
+                        </div>
+                    </div>
+
+                    <!--Dropdown Navbar Body-->
+                    <div class="collapse" id="dropdownNavbar">
+                        <div class="py-1">
+                            <a href="{{ url_for('main') }}" class="nav-link text-white">Головна</a>
+                            <a href="{{ url_for('create') }}" class="nav-link text-white">Створити анкетування</a>
+                        </div>
+                    </div>
+                </header>
+
+                <!--Main part of a page-->
+                <main class="container d-flex flex-wrap align-items-center justify-content-center">
+
+                    <!--Survey changed successful alert-->
+                    {% if session['survey_changed'] == True %}
+                        <div class="w-100 mt-3 p-3 rounded shadow-sm transparency" style="background-color:green !important;">
+                            <p class="text-successful">Анкетування було успішно змінено!</p>
+                        </div>
+                    {% else %}
+                    {% endif %}
+
+                    <div class="container-fluid w-100 d-flex flex-wrap justify-content-center mt-3">
+
+                        <div class="w-100 d-flex flex-wrap align-items-center justify-content-center">
+
+                            {% if session['profile'] %}
+
+                                <!-- Profile selected -->
+                                <a href="{{ url_for('profile') }}" class="w-100 text-decoration-none">
+                                    <div class="w-100 p-3 rounded shadow-sm bg-white ">
+                                        <p class="mb-1 text-secondary">{{ user.name }}</p>
+                                        <p class="text-secondary mt-0 mb-0" style="font-size:0.7rem;">{{ user.email }}</p>
+                                    </div>
+                                </a>
+
+                                <div class="w-100 mt-2 p-3 rounded shadow-sm bg-white">
+                                    <p class="p-2 mb-0"><a href="{{ url_for('mysurveys') }}" class="text-dark text-decoration-none">Мої анкетування</a></p>
+                                    <p class="border-top p-2 mb-0"><a href="{{ url_for('analytics_cabinet') }}" class="text-dark text-decoration-none">Аналітика</a></p>
+                                    <!-- <p class="p-2 mb-0"><a href="{{ url_for('creategraphic') }}" class="text-dark text-decoration-none">Створити графік</a></p> -->
+                                </div>
+
+                            {% elif session['mysurveys'] %}
+
+                                <!-- Surveys selected -->
+                                <a href="{{ url_for('profile') }}" class="w-100 text-decoration-none">
+                                    <div class="w-100 p-3 rounded shadow-sm bg-white ">
+                                        <p class="mb-1">{{ user.name }}</p>
+                                        <p class="text-secondary mt-0 mb-0" style="font-size:0.7rem;">{{ user.email }}</p>
+                                    </div>
+                                </a>
+
+                                <div class="w-100 mt-2 p-3 rounded shadow-sm bg-white">
+                                    <p class="p-2 mb-0"><a href="{{ url_for('mysurveys') }}" class="text-secondary text-decoration-none">Мої анкетування</a></p>
+                                    <p class="border-top p-2 mb-0"><a href="{{ url_for('analytics_cabinet') }}" class="text-dark text-decoration-none">Аналітика</a></p>
+                                    <!-- <p class="p-2 mb-0"><a href="{{ url_for('creategraphic') }}" class="text-dark text-decoration-none">Створити графік</a></p> -->
+                                </div>
+
+                            {% elif session['analytics'] %}
+
+                                <!-- Analytics selected -->
+                                <a href="{{ url_for('profile') }}" class="w-100 text-decoration-none">
+                                    <div class="w-100 p-3 rounded shadow-sm bg-white ">
+                                        <p class="mb-1">{{ user.name }}</p>
+                                        <p class="text-secondary mt-0 mb-0" style="font-size:0.7rem;">{{ user.email }}</p>
+                                    </div>
+                                </a>
+
+                                <div class="w-100 mt-2 p-3 rounded shadow-sm bg-white">
+                                    <p class="p-2 mb-0"><a href="{{ url_for('mysurveys') }}" class="text-dark text-decoration-none">Мої анкетування</a></p>
+                                    <p class="border-top p-2 mb-0"><a href="{{ url_for('analytics_cabinet') }}" class="text-secondary text-decoration-none">Аналітика</a></p>
+                                    <!-- <p class="p-2 mb-0"><a href="{{ url_for('creategraphic') }}" class="text-dark text-decoration-none">Створити графік</a></p> -->
+                                </div>
+
+                            {% elif session['creategraphic'] %}
+
+                                <!-- Create graphic selected -->
+                                <a href="{{ url_for('profile') }}" class="w-100 text-decoration-none">
+                                    <div class="w-100 p-3 rounded shadow-sm bg-white ">
+                                        <p class="mb-1">{{ user.name }}</p>
+                                        <p class="text-secondary mt-0 mb-0" style="font-size:0.7rem;">{{ user.email }}</p>
+                                    </div>
+                                </a>
+
+                                <div class="w-100 mt-2 p-3 rounded shadow-sm bg-white">
+                                    <p class="p-2 mb-0"><a href="{{ url_for('mysurveys') }}" class="text-dark text-decoration-none">Мої анкетування</a></p>
+                                    <p class="border-top p-2 mb-0"><a href="{{ url_for('analytics_cabinet') }}" class="text-dark text-decoration-none">Аналітика</a></p>
+                                    <!-- <p class="p-2 mb-0"><a href="{{ url_for('creategraphic') }}" class="text-secondary text-decoration-none">Створити графік</a></p> -->
+                                </div>
+
+                            {% else %}
+
+                                <!-- Nothing selected -->
+                                <a href="{{ url_for('profile') }}" class="w-100 text-decoration-none">
+                                    <div class="w-100 p-3 rounded shadow-sm bg-white ">
+                                        <p class="mb-1">{{ user.name }}</p>
+                                        <p class="text-secondary mt-0 mb-0" style="font-size:0.7rem;">{{ user.email }}</p>
+                                    </div>
+                                </a>
+
+                                <div class="w-100 mt-2 p-3 rounded shadow-sm bg-white">
+                                    <p class="p-2 mb-0"><a href="{{ url_for('mysurveys') }}" class="text-dark text-decoration-none">Мої анкетування</a></p>
+                                    <p class="border-top p-2 mb-0"><a href="{{ url_for('analytics_cabinet') }}" class="text-dark text-decoration-none">Аналітика</a></p>
+                                    <!-- <p class="p-2 mb-0"><a href="{{ url_for('creategraphic') }}" class="text-dark text-decoration-none">Створити графік</a></p> -->
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Side-block -->
+                        <div class="w-100 mt-4 mb-5 rounded shadow-sm bg-white">
+
+                            {% if session['profile'] %}
+
+                                <!-- Profile -->
+                                <p class="h2 p-4 border-bottom">Мій профіль</p>
+                                <div class="p-3">
+                                    <p class="text-secondary border-bottom mb-0 p-2">Ім'я</p>
+                                    <p class="mt-0 p-2">{{ user.name }}</p>
+                                    <p class="text-secondary border-bottom mt-4 mb-0 p-2">Електронна адреса</p>
+                                    <p class="mt-0 p-2">{{ user.email }}</p>
+                                    <p class="text-secondary border-bottom mt-4 mb-0 p-2">Пароль</p>
+                                    <p class="mt-0 p-2">**********</p>
+                                </div>
+
+                            {% elif session['mysurveys'] %}
+
+                                <!-- Surveys -->
+                                <div class="px-4 pt-4 pb-1">
+                                    <p class="h3">Мої анкетування</p>
+                                    <p class="text-secondary">Виберіть анкетування, щоб проглянути або змінити його</p>
+                                </div>
+
+                                {% if surveys %}
+                                    <div class="accordion" id="accordion">
+                                        {% for survey in surveys %}
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed small-screens" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ survey.id }}" aria-expanded="true" aria-controls="collapse{{ survey.id }}">
+                                                        {{ survey.title }}
+                                                    </button>
+                                                    <div id="collapse{{ survey.id }}" class="accordion-collapse collapse" data-bs-parent="#accordion">
+                                                        <div class="accordion-body">
+                                                            <div class="border-bottom py-2">
+                                                                <form action="{{ url_for('change_survey_access', survey_id=survey.id) }}" method="POST">
+                                                                    <div class="mb-2 text-secondary form-check form-check-reverse form-switch small-screens">
+                                                                        <label class="form-check-label" for="switchReverse-sm{{ survey.id }}">
+                                                                            Доступ
+                                                                        </label>
+                                                                        <input id="switchReverse-sm{{ survey.id }}" name="switch" class="form-check-input" type="checkbox" role="switch" value="1"
+                                                                               {% if survey.access %}
+                                                                                    checked
+                                                                               {% else %}
+                                                                                    {% endif %}
+                                                                        />
+                                                                    </div>
+                                                                </form>
+                                                                {% if survey.access %}
+                                                                    <p class="text-success small-screens">Відкритий</p>
+                                                                {% else %}
+                                                                    <p class="text-danger small-screens">Закритий</p>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="mt-4 mb-2">
+                                                                <p class="text-secondary small-screens">Код для проходження:</p>
+                                                                <p class="small-screens">
+                                                                    {{ survey.code }}
+                                                                </p>
+                                                            </div>
+                                                            <div class="d-flex justify-content-end align-items-center">
+                                                                <a href="{{ url_for('my_survey', survey_code=survey.code) }}" class="text-decoration-none">
+                                                                    <button class="btn btn-outline-primary mt-4 mb-2 small-screens">Переглянути/Редагувати</button>
+                                                                </a>
+                                                            </div>
+                                                            <div class="d-flex justify-content-end align-items-center">
+                                                                <button class="btn btn-danger mt-2 mb-2 small-screens" data-bs-toggle="modal" data-bs-target="#deleteSurveyModalCenter{{ survey.id }}-sm-scr">Видалити</button>
+                                                            </div>
+
+                                                            <!--Modal for deleting survey-->
+                                                            <div class="modal fade" id="deleteSurveyModalCenter{{ survey.id }}-sm-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                                    <div class="modal-content">
+
+                                                                        <form name="deleteSurveyForm{{ survey.id }}-sm" action="{{ url_for('delete_survey', survey_id=survey.id) }}" method="POST">
+                                                                            <div class="modal-header">
+                                                                                <h5 class="modal-title">Ви дійсно хочете видалити це анкетування?</h5>
+                                                                                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                            </div>
+
+                                                                            <div class="modal-footer">
+                                                                                <button type="submit" class="btn btn-danger">Так</button>
+                                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
+                                                                            </div>
+                                                                        </form>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </h2>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+
+                                {% else %}
+                                    <div class="border-top px-4 py-3">Наразі ви не маєте жодного створеного анкетування.</div>
+                                {% endif %}
+
+                            {% elif session['analytics'] %}
+
+                                <!-- Analytics -->
+                                <div class="px-4 pt-4 pb-1">
+                                    <p class="h3">Аналітика</p>
+                                    <p class="text-secondary">Виберіть анкетування, щоб побачити аналітику до нього</p>
+                                </div>
+
+                                {% if surveys %}
+                                    <div class="accordion" id="accordion-analytics">
+                                        {% for survey in surveys %}
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed small-screens" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-analytics{{ survey.id }}" aria-expanded="true" aria-controls="collapse-analytics{{ survey.id }}">
+                                                        {{ survey.title }}
+                                                    </button>
+                                                    <div id="collapse-analytics{{ survey.id }}" class="accordion-collapse collapse" data-bs-parent="#accordion-analytics">
+                                                        <div class="accordion-body">
+                                                            <div class="mt-4 mb-2">
+                                                                <p class="text-secondary small-screens">Кількість проходжень:</p>
+                                                                {% if survey.sessions %}
+                                                                    <p class="small-screens">
+                                                                        {% for session_n in survey.sessions %}
+                                                                            {% if loop.nextitem is not defined %}
+                                                                                {{ loop.length }}
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                    </p>
+                                                                {% else %}
+                                                                    <p class="small-screens text-danger">Жодного</p>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="d-flex justify-content-end align-items-center">
+                                                                <a href="{{ url_for('analytics', survey_code=survey.code) }}" class="text-decoration-none">
+                                                                    <button class="btn btn-outline-primary mt-4 mb-2 small-screens">Переглянути</button>
+                                                                </a>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </h2>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+
+                                {% else %}
+                                    <div class="border-top px-4 py-3">Наразі ви не маєте жодного створеного анкетування.</div>
+                                {% endif %}
+
+                            {% elif session['creategraphic'] %}
+
+                                <!-- Create graphic -->
+                                graphics
+
+                            {% else %}
+                                <div class="p-5">
+                                    <p class="h1">Це ваш особистий кабінет</p>
+                                    <p class="h5 mt-3 text-light-mon text-secondary">Оберіть розділ, який вам потрібен, на навігаційній панелі зверху</p>
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                </main>
+
+                <!--Footer-->
+                <footer class="footer mt-auto shadow-lg transparency">
+                    <div class="container d-flex flex-wrap justify-content-between align-items-center py-2">
+                        <p class="mb-0 text" style="font-family:'Montserrat ExtraLight', sans-serif;">&copy; 2023 Pylyp Kutyla</p>
+                        <a href="{{ url_for('main') }}">
+                            <img id="logo-footer-sm-scr" class="img-fluid" src="{{ url_for('static', filename='static/design/svg/logo2.svg') }}" alt="logo"/>
+                        </a>
+                    </div>
+                </footer>
+
+
+                <!--Modal for signing out-->
+                <div class="modal fade" id="signoutModalCenter-sm-scr" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+
+                            <form name="signOutForm-sm" action="{{ url_for('log_out') }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Ви дійсно хочете вийти з акаунту?</h5>
+                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-danger">Так</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+
+        {% else %}
+
+        <!--If user is not authorized-->
+
+            <!--XL+ screens-->
+            <div class="d-none d-xl-block d-flex flex-column min-vh-100">
+
+                <!--Modal for signing in-->
+                <div class="container-fluid d-flex align-items-center justify-content-center mt-5 p-5">
+                    <div class="modal-content w-25">
+
+                        <form name="signInForm-cabinet-xl" action="{{ url_for('log_in_page_cabinet') }}" method="POST" class="needs-validation-signIn" novalidate>
+                            <div class="modal-header">
+                                <h5 class="modal-title">Ви не авторизовані</h5>
+                            </div>
+
+                            <div class="modal-body p-4">
+                                <div>
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Електронна пошта:</p>
+                                    <input name="emailSignIn" type="email" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть коректну електронну пошту
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Пароль:</p>
+                                    <input name="passwordSignIn" type="password" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть пароль
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Увійти</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+
+                <!--Invalid e-mail(password) alert-->
+                {% if session['email_alert'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-danger alert-dismissible fade show text-center w-50 mt-3" role="alert">
+                            <p class="mb-0">Жодний акаунт не пов'язаний з цією електронною адресою</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% elif session['password_alert'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-danger alert-dismissible fade show text-center w-50 mt-3" role="alert">
+                            <p class="mb-0">Неправильний пароль</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% else %}
+                {% endif %}
+            </div>
+
+
+            <!--XL- screens-->
+            <div class="d-xl-none small-screens">
+
+                <!--Modal for signing in-->
+                <div class="container d-flex align-items-center justify-content-center mt-5 p-5">
+                    <div class="modal-content w-100">
+
+                        <form name="signInForm-cabinet-xl" action="{{ url_for('log_in_page_cabinet') }}" method="POST" class="needs-validation-signIn" novalidate>
+                            <div class="modal-header">
+                                <h5 class="modal-title">Ви не авторизовані</h5>
+                            </div>
+
+                            <div class="modal-body p-4">
+                                <div>
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Електронна пошта:</p>
+                                    <input name="emailSignIn" type="email" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть коректну електронну пошту
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <p class="text-muted mb-1" style="font-size:0.85rem;">Пароль:</p>
+                                    <input name="passwordSignIn" type="password" class="form-control" required>
+                                    <div class="invalid-feedback">
+                                        Будь ласка, введіть пароль
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Увійти</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+
+                <!--Invalid e-mail(password) alert-->
+                {% if session['email_alert'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-danger alert-dismissible fade show w-75 mt-3" role="alert">
+                            <p class="mb-0">Жодний акаунт не пов'язаний з цією електронною адресою</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% elif session['password_alert'] == True %}
+                    <div class="fixed-bottom d-flex align-items-center justify-content-center">
+                        <div class="alert alert-danger alert-dismissible fade show w-75 mt-3" role="alert">
+                            <p class="mb-0">Неправильний пароль</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% else %}
+                {% endif %}
+            </div>
+
+        {% endif %}
+
+
+
+
+		<!--Script for Bootstrap 5-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+        <!--Script for jQuery-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+
+        <!-- jQuery script for submitting with switch -->
+        <script>
+            $(document).ready(function() {
+                $('input[name=switch]').change(function(){
+                    $(this).parent().parent().submit();
+                });
+            });
+        </script>
+
+
+        <!--Script for HTMX-->
+        <script src="https://unpkg.com/htmx.org@1.9.9"></script>
+
+        <!--Scripts for Forms validation-->
+        <script src="{{ url_for('static', filename='static/js/bootstrap-form-signUpValidation.js') }}"></script>
+        <script src="{{ url_for('static', filename='static/js/bootstrap-form-signInValidation.js') }}"></script>
+
+
+    </body>
+</html>
